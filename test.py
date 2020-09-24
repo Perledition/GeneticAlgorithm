@@ -88,4 +88,15 @@ model = GeneticSequence(
     layers,
 )
 
-print(model.train_genetic(x, y))
+model.train_genetic(x, y)
+print(model.get_all_weights())
+
+new_weights = [
+    np.array([[0.1, 0.1],
+              [0.2, 0.2],
+              [0.3, 0.3]]),
+    np.array([[0.1],
+              [0.2]])
+]
+
+model.update_weights(new_weights)
