@@ -4,6 +4,7 @@ from random import choices, randint, randrange, randrange, random
 
 # import from third party modules
 import numpy as np
+import sklearn.datasets as skd
 
 # import project related modules
 from Network.sequence import GeneticSequence
@@ -46,11 +47,8 @@ class GeneticModel:
     def _generate_population(self, architecture, population_size):
 
         # generate a bunch of models with the same architecture but random weights
-        population = [Sequence(
+        population = [GeneticSequence(
             architecture,
-            loss="cross_entropy",
-            epochs=1,
-            batch_size=1
         ) for _ in range(0, population_size)]
 
         return population
@@ -76,13 +74,13 @@ class GeneticModel:
         return 0
 
 
-x = np.random.randn(10, 2)
+x = np.random.randn(10, 3)
 y = np.array([0, 1, 0, 1, 1, 1, 0, 1, 0, 0])
-
+print(x.shape)
 layers = [
-    Dense(3, 3, input_layer=True),
+    Dense(2, 3, input_layer=True),
     Sigmoid(),
-    Dense(2, 3, activation="softmax")
+    Dense(1, 2, activation="softmax")
 ]
 
 
@@ -90,6 +88,4 @@ model = GeneticSequence(
     layers,
 )
 
-print(*model.get_all_weights(), sep="\n")
-
-
+print(model.train_genetic(x, y))
