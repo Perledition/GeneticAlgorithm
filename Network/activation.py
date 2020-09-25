@@ -14,7 +14,7 @@ class Sigmoid:
     def __str__(self):
         return f"Activation: Sigmoid"
 
-    def forward(self, x):
+    def forward(self, x, *args):
         # line of code to prevent overflow in numpy since this is a common issue
         signal = np.clip(x, -150000, 150000)
 
@@ -33,7 +33,7 @@ class RelU:
     def __str__(self):
         return "Activation: RelU"
 
-    def forward(self, x):
+    def forward(self, x, *args):
         self.cache = x.copy()
         return np.maximum(0, x)
 
@@ -43,7 +43,7 @@ class RelU:
 
 class Softmax:
 
-    def forward(self, x):
+    def forward(self, x, *args):
         x = np.clip(x, -150000, 150000)
         exps = np.exp(x - np.max(x))
         return exps / np.sum(exps)

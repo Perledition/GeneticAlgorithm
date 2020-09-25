@@ -1,5 +1,6 @@
 # import standard modules
 from copy import deepcopy
+import random
 
 # import third party modules
 import numpy as np
@@ -12,6 +13,7 @@ class Dense(object):
 
     def __init__(self, neurons: int, size: int, learning_rate=0.01, input_layer=False, activation=None):
         self.neurons = neurons
+
         self.learning_rate = learning_rate
         self.weights = None
         self.bias = None
@@ -24,10 +26,10 @@ class Dense(object):
         return f"Dense: {self.neurons}"
 
     def _initialize_weights(self, size):
-        self.weights = np.random.rand(size, self.neurons) * np.sqrt((2/size)) * 0.1
+        self.weights = np.random.randn(size, self.neurons)  # * np.sqrt((2/size)) * 0.1
         self.bias = np.zeros((1, self.neurons))
 
-    def forward(self, x):
+    def forward(self, x, skip_bias=True):
 
         if self.input_layer:
             x = x.T
@@ -35,6 +37,7 @@ class Dense(object):
         if self.weights is None:
             self._initialize_weights(x.shape[1])
 
+        self.bias = 0 if skip_bias else self.bias
         result = np.dot(x, self.weights) + self.bias
 
         if self.activation is None:

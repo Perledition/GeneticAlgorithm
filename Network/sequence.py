@@ -1,5 +1,7 @@
 # import standard modules
 import inspect
+import operator
+import random
 
 
 # import third party modules
@@ -15,20 +17,34 @@ from Network.metric import ClassificationMatrix
 class GeneticSequence(object):
 
     def __init__(self, layers: list, model_type="classification"):
+        self.id = self._generate_color_id()
         self.layers = layers
-        self.performance = 0
+        self.fitness = 0
+        self.avg_precision = 0
+        self.avg_recall = 0
         self.fitness_func = {
             "classification": self._classification_fitness,
             "regression": 1
         }[model_type]
 
+    def _generate_color_id(self):
+        r = lambda: random.randint(0, 255)
+        return '#%02X%02X%02X' % (r(), r(), r())
+
     def get_all_weights(self):
         return [l.weights for l in self.layers if isinstance(l, Dense)]
 
-    def update_weights(self, weights):
+    def update_weights(self, new_weights):
 
-        for layer in self.layers:
-            if layer
+        crnt_index = 0
+        for layer in range(len(self.layers)):
+            if isinstance(self.layers[layer], Dense):
+                assert self.layers[layer].weights.shape == new_weights[crnt_index].shape,\
+                    f"weight shapes do not fit old: {self.layers[layer].weights.shape} new: {new_weights[crnt_index].shape}"
+
+                self.layers[layer].weights = new_weights[crnt_index]
+                crnt_index += 1
+
 
     def _classification_fitness(self, y_hat, y):
         """
@@ -52,27 +68,29 @@ class GeneticSequence(object):
             fn = np.sum(np.take(matrix[target_class], [ix for ix in range(matrix.shape[0]) if ix != target_class]))
             fp = np.sum(matrix[:, target_class]) - tp
 
+            for measure in [tp, fn, fp]:
+                pass
             # calculate precision and recall and collect the results for each class
 
-            if (tp > 0) and (fp > 0):
+            if tp > 0:
                 precision = tp / (tp + fp)
             else:
                 precision = 0
             precision_count.append(precision)
 
-            if (tp > 0) and (fn > 0):
+            if tp > 0:
                 recall = tp / (tp + fn)
             else:
                 recall = 0
             recall_count.append(recall)
 
         # calculate the average precision and recall performance
-        avg_precision = sum(precision_count) / len(precision_count)
-        avg_recall = sum(recall_count) / len(recall_count)
+        self.avg_precision = sum(precision_count) / len(precision_count)
+        self.avg_recall = sum(recall_count) / len(recall_count)
 
         # the fitness for the classification problem is defined by the area of a rectangle
         # for more information check the general documentation
-        fitness = avg_precision * avg_recall
+        fitness = self.avg_precision + self.avg_recall
         return fitness
 
     def _calculate_fitness(self, y_hat, y):
@@ -90,7 +108,7 @@ class GeneticSequence(object):
                 z = self.layers[i].forward(z)
 
             # append results to list of results
-            results.append(z[0][0])
+            results.append(np.argmax(z))
 
         # make the result list an array
         results = np.array(results)
@@ -103,5 +121,4 @@ class GeneticSequence(object):
         # since we do not use a gradient descent method to update the weights
         # so we check the performance after each forward pass
         predictions = self.predict(x)
-        self.performance = self._calculate_fitness(predictions, y)
-        print("performance: ", self.performance)
+        self.fitness = self._calculate_fitness(predictions, y)
