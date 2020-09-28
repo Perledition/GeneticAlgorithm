@@ -10,12 +10,25 @@ from PIL import Image
 from matplotlib import pyplot as plt
 
 # import project related modules
-from Network.sequence import GeneticSequence
+from genetic_extension.sequences import GeneticSequence
 
 
-class GeneticModel:
+class GeneticModel(object):
+    """
+    GeneticModel is a NumpyNet specific Model which runs and Genetic Algorithm for a NumpyNet classifier.
+    It takes a layer architecture in form of a list as the normal NumpyNet and creates multiple models (population)
+    with the same architecture. Genetic Model tries to find the best combination out of weights and biases in order to
+    full fill the classification task and is therefore another way to train a neuronal network beside the commonly used
+    gradient descent approach. While it's for sure not the most efficient way to train such a model it is definitely
+    a more understandable approach.
 
-    def __init__(self, architecture, fitness_limit: float = 2.00, generation_limit: int = 100,
+    :param: architecture: list: defines the layer structure, for more information check NumpyNet Repository
+    :param: fitness_limit: float: maximum average fitness of the population default 2.0
+    :param: generation_limit: int: maximum amount of generation to run the model default 100
+    :param: population_size: int: size of population (model generated) default 200
+    """
+
+    def __init__(self, architecture: list, fitness_limit: float = 2.00, generation_limit: int = 100,
                  population_size: int = 200):
 
         # defines the boundaries which will be used in order to define an end of the runtime
@@ -44,7 +57,7 @@ class GeneticModel:
 
         # count from 0 to population size and and generate a GeneticSequence NumpyNet for each count step
         # Genetic Sequence is a specific wrapper similar to Sequence from NumpyNet. However, GeneticSequence is
-        # created in order to fullfill the requirements for the GA. Read more about GeneticSequence in it's class
+        # created in order to full fill the requirements for the GA. Read more about GeneticSequence in it's class
         # description.
         # each time a model is created, the list of layers (self.architecture) is copied deeply. This step is needed
         # to ensure that each model points at a different location of memory and therefore is an individual.
@@ -118,7 +131,7 @@ class GeneticModel:
         :return: numpy.array: returns a new child chromosome / weight
         """
 
-        assert p1_weights.shape == p2_weights, "parent1 and parent2 must have the same input in order to make crossover"
+        assert p1_weights.shape == p2_weights.shape, "parent1 and parent2 must have the same input in order to make crossover"
 
         # get the amount of rows and columns for the matrix
         rows, columns = p1_weights.shape
