@@ -26,7 +26,6 @@ class Dense(object):
 
     def _initialize_weights(self, size):
         self.weights = np.random.uniform(-1, 1, size=(size, self.neurons)) * 0.1
-        # self.weights = np.random.rand(size, self.neurons) * random.random() + random.choice([-1, 1]) # * np.sqrt((2/size)) * 0.1
         self.bias = np.random.randn(1, self.neurons)
         # print("init bias: ", self.bias.shape, self.bias)
 

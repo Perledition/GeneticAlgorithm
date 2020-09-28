@@ -17,6 +17,7 @@ import sklearn.datasets as skd
 from Network.sequence import GeneticSequence
 from Network.dense import Dense
 from Network.activation import Sigmoid, RelU
+from Network.metric import ClassificationMatrix
 
 # idea: each member of a population is a byte array which is created from the weights of a network, it's fitness is
 # defined by it's loss accuracy and it's loss value
@@ -42,7 +43,7 @@ class GeneticModel:
 
         # generate a bunch of models with the same architecture but random weights
         population = [GeneticSequence(
-            self.architecture,
+            deepcopy(self.architecture),
         ) for _ in range(0, population_size)]
 
         return population
@@ -119,6 +120,7 @@ class GeneticModel:
 
                 chromosome_pick = lambda x, y, fitness: y if random.random() < fitness else x
                 child_weight = self._crossover_weights(p1_weights, p2_weights, chromosome_pick, heritage_proba)
+                child_weight = self._mutation(child_weight)
                 child_bias = chromosome_pick(p1_bias, p2_bias, heritage_proba)
                 child_bias = self._mutation(child_bias)
 
@@ -126,14 +128,13 @@ class GeneticModel:
                 child_b.append(child_bias)
 
             child_id = parents[0].id[:2] + parents[1].id[2:5] + "%02X" % random.randint(0, 255)
-
             children[child_id] = {"weights": [deepcopy(wl) for wl in child_w], "bias": [deepcopy(bl) for bl in child_b]}
             i += 1
 
         print("amount children produced: ", len(children))
         return children
 
-    def _mutation(self, weight, probability: float = 0.6):
+    def _mutation(self, weight, probability: float = 0.2):
 
         # randomly choose an index for the mutation on row and column level
         for _ in range(random.randint(1, 3)):
@@ -155,6 +156,11 @@ class GeneticModel:
 
     def generation_plot(self, generation, best, worst):
         plt.figure(figsize=(20, 10))
+        best_title = round(best, 6)
+        worst_title = round(worst, 6)
+        avg_title = round(self.population_fitness_avg[-1], 6)
+        plt.suptitle(f"GA: {generation}, best fit: {best_title}, worst fit: {worst_title}, "
+                     f"avg. fit: {avg_title}", fontsize=16)
 
         # create fitness scatter plot
         plt.subplot(1, 3, 1)
@@ -178,12 +184,10 @@ class GeneticModel:
         plt.ylabel("avg. population fitness")
         plt.ylim(0, 2)
 
-        plt.tight_layout()
-
         if not os.path.isdir("run"):
             os.mkdir(os.path.join(os.getcwd(), "run"))
 
-        plt.title(f"GA: {generation}, best fit: {best}, worst fit: {worst}, avg. fit: {self.population_fitness_avg[-1]}")
+
         plt.savefig(os.path.join(os.getcwd(), f"run/generation{generation}.png"))
 
     def to_gif(self):
@@ -191,7 +195,7 @@ class GeneticModel:
         file_path_out = os.path.join(os.getcwd(), "run/experiment.gif")
         img, *imgs = [Image.open(f) for f in sorted(glob.glob(file_path_in))]
         img.save(fp=file_path_out, format='GIF', append_images=imgs,
-                 save_all=True, duration=100, loop=0)
+                 save_all=True, duration=200, loop=0)
 
     def train(self, x, y, generation_replacement=0.2, monitor=False):
         replace_size = int(len(self.population) * generation_replacement)
@@ -221,11 +225,11 @@ class GeneticModel:
             ix = 0
             children = list()
             for child_id, child_values in new_weights.items():
-                child = GeneticSequence(self.architecture)
+                child = GeneticSequence(deepcopy(self.architecture))
                 child.update_weights(child_values["weights"])
                 child.update_bias(child_values["bias"])
                 child.id = child_id
-                children.append(child)
+                children.append(deepcopy(child))
                 ix += 1
 
             # check remove the individuals with the worst fitness
@@ -238,7 +242,7 @@ class GeneticModel:
             if monitor:
                 self.generation_plot(generation, best_fitness, worst_fitness)
 
-            if generation == self.generation_limit:
+            if (generation == self.generation_limit) or (best_fitness == self.fitness_limit):
                 evolve = False
             else:
                 generation += 1
@@ -253,7 +257,7 @@ class GeneticModel:
 
 
 def load_extra_datasets():
-    N = 300
+    N = 700
     gq = skd.make_gaussian_quantiles(mean=None, cov=0.7, n_samples=N, n_features=3, n_classes=2,  shuffle=True, random_state=None)
     return gq
 
@@ -272,8 +276,16 @@ layers = [
     Dense(2, activation="softmax")
 ]
 
-GeneticModel(
+model = GeneticModel(
     layers,
-    generation_limit=150,
+    generation_limit=500,
     population_size=100,
-).train(X, Y, generation_replacement=0.2, monitor=True)
+    fitness_limit=1.9
+).train(X[:600], Y[:600], generation_replacement=0.2, monitor=True)
+
+
+print("\nTestResults")
+
+test_prediction = model.predict(X[600:])
+matrix = ClassificationMatrix().fit(test_prediction, Y[600:])
+print(matrix)

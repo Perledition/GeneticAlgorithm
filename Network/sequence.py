@@ -2,6 +2,7 @@
 import inspect
 import operator
 import random
+from copy import deepcopy
 
 
 # import third party modules
@@ -42,11 +43,11 @@ class GeneticSequence(object):
         crnt_index = 0
         for layer in range(len(self.layers)):
             if isinstance(self.layers[layer], Dense):
-                assert self.layers[layer].weights.shape == new_weights[crnt_index].shape,\
-                    f"weight shapes do not fit old: {self.layers[layer].weights.shape}" \
-                    f"new: {new_weights[crnt_index].shape}"
+                # assert self.layers[layer].weights.shape == new_weights[crnt_index].shape,\
+                #    f"weight shapes do not fit old: {self.layers[layer].weights.shape}" \
+                #    f"new: {new_weights[crnt_index].shape}"
 
-                self.layers[layer].weights = new_weights[crnt_index]
+                self.layers[layer].weights = deepcopy(new_weights[crnt_index])
                 crnt_index += 1
 
     def update_bias(self, new_bias):
