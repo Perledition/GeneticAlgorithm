@@ -34,17 +34,27 @@ class GeneticSequence(object):
     def get_all_weights(self):
         return [l.weights for l in self.layers if isinstance(l, Dense)]
 
+    def get_all_bias(self):
+        return [b.bias for b in self.layers if isinstance(b, Dense)]
+
     def update_weights(self, new_weights):
 
         crnt_index = 0
         for layer in range(len(self.layers)):
             if isinstance(self.layers[layer], Dense):
                 assert self.layers[layer].weights.shape == new_weights[crnt_index].shape,\
-                    f"weight shapes do not fit old: {self.layers[layer].weights.shape} new: {new_weights[crnt_index].shape}"
+                    f"weight shapes do not fit old: {self.layers[layer].weights.shape}" \
+                    f"new: {new_weights[crnt_index].shape}"
 
                 self.layers[layer].weights = new_weights[crnt_index]
                 crnt_index += 1
 
+    def update_bias(self, new_bias):
+        crnt_index = 0
+        for layer in range(len(self.layers)):
+            if isinstance(self.layers[layer], Dense):
+                self.layers[layer].bias = new_bias[crnt_index]
+                crnt_index += 1
 
     def _classification_fitness(self, y_hat, y):
         """

@@ -11,13 +11,12 @@ from Network.activation import Softmax
 
 class Dense(object):
 
-    def __init__(self, neurons: int, size: int, learning_rate=0.01, input_layer=False, activation=None):
+    def __init__(self, neurons: int, learning_rate=0.01, input_layer=False, activation=None):
         self.neurons = neurons
 
         self.learning_rate = learning_rate
         self.weights = None
         self.bias = None
-        self._initialize_weights(size)
         self.cache = None
         self.activation = {"softmax": Softmax(), None: None}[activation]
         self.input_layer = input_layer
@@ -26,10 +25,12 @@ class Dense(object):
         return f"Dense: {self.neurons}"
 
     def _initialize_weights(self, size):
-        self.weights = np.random.randn(size, self.neurons)  # * np.sqrt((2/size)) * 0.1
-        self.bias = np.zeros((1, self.neurons))
+        self.weights = np.random.uniform(-1, 1, size=(size, self.neurons)) * 0.1
+        # self.weights = np.random.rand(size, self.neurons) * random.random() + random.choice([-1, 1]) # * np.sqrt((2/size)) * 0.1
+        self.bias = np.random.randn(1, self.neurons)
+        # print("init bias: ", self.bias.shape, self.bias)
 
-    def forward(self, x, skip_bias=True):
+    def forward(self, x):
 
         if self.input_layer:
             x = x.T
@@ -37,7 +38,6 @@ class Dense(object):
         if self.weights is None:
             self._initialize_weights(x.shape[1])
 
-        self.bias = 0 if skip_bias else self.bias
         result = np.dot(x, self.weights) + self.bias
 
         if self.activation is None:

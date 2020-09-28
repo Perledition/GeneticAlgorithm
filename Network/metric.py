@@ -12,7 +12,10 @@ class ClassificationMatrix:
 
     def _calculate_matrix(self, y_hat, y):
         result = dict()
-        for i in range(0, 4):
+
+        unique_classes = len(list(set(y)))
+
+        for i in range(0, unique_classes):
             y_indexes = list(np.where(y == i)[0])
 
             collection = list(zip(list(y[y_indexes]), list(y_hat[y_indexes])))
@@ -21,7 +24,7 @@ class ClassificationMatrix:
 
         return np.array([
             [self.value_pick(values, cl) for classes, values in result.items()]
-            for cl in range(0, 4)]
+            for cl in range(0, unique_classes)]
         )
 
     @staticmethod
