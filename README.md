@@ -78,8 +78,8 @@ precision: 0.9433
 
 ###### Compared to NumpyNet
 Overall NumpyNet did better than GeneticNumpyNet. With 98% on precision and recall it was more effective than the Genetic Algorithm. However, one could say that this is depended on the parameter settings. So with more generations
-or a larger population size the results might be better. This is true, but another fact is that GeneticNumpyNet is also way slower than the gradient descent method. Therefore it's more beautiful to see how the Model is trained :D.
+or a larger population size the results might be better. This is true, but another fact is that GeneticNumpyNet is also way slower than the gradient descent method. However, it's more beautiful to see how the Model is trained :D.
 
 
 ### Limitations and Further Improvements
-GeneticNumpyNet is slow, really slow. This is partly depended on the nature of the algorithm but also because code was not designed to be perfectly efficient. It was more a tryout to implement such an algorithm from scratch and without any library beside numpy and plain python. Also no framework beside the theory of the algorithm was used to implement it so it might be, that the implementation is not perfectly accurate according to other software packages. Also the the code is less generic as NumpyNet. An improvement could be the speed of the algorithm as well as a fitness function for a regression problem.
+GeneticNumpyNet is very slow. This is partly depended on the nature of the algorithm but also because the code was not designed to be perfectly efficient. It was more a tryout to implement such an algorithm from scratch and without any library beside numpy and plain python. Also no framework beside the theory of the algorithm was used to implement it so it might be, that the implementation is not perfectly accurate according to other software packages. Also the the code is less generic as NumpyNet. An improvement could be the speed of the algorithm as well as a fitness function for a regression problem.
